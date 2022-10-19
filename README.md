@@ -45,7 +45,7 @@ bench = microbenchmark::microbenchmark(
 ggplot2::autoplot(bench)
 ```
 
-![](pl1.png){width="460"}
+![](pl1.png)
 
 ### `twowayfeweights_transform()`
 
@@ -69,6 +69,8 @@ ggplot2::autoplot(bench)
 
 ggplot2::autoplot(bench)
 ```
+
+![](pl2.png)
 
 ## Installation (in progress)
 

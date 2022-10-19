@@ -72,6 +72,27 @@ ggplot2::autoplot(bench)
 
 ![](pl2.png)
 
+### `twowayfeweights_filter()`
+
+With 100 iterations, `TWFEweights` is faster than `twowayfeweights` (see figure and code below).
+
+```
+bench = microbenchmark::microbenchmark(
+  "twowayfeweights" = twowayfeweights_filter(data, cmd_type = "fdTR", controls = c("state", "crtl"), treatments = c("treat1", "treat2")),
+  "TWFEweights" =  twowayfeweights_filter(data, cmd_type = "fdTR", controls = c(state, crtl), treatments = c(treat1, treat2)), times = 100L
+)
+
+#Unit: milliseconds
+#expr                 min        lq       mean    median       uq      max neval cld
+#twowayfeweights 144.5159 149.48660 168.036897 158.74115 173.2908 479.1133   100   b
+#TWFEweights       2.8464   2.98215   4.798745   3.13135   4.0239  21.5931   100  a 
+
+
+ggplot2::autoplot(bench)
+```
+
+![](pl3.png)
+
 ## Installation (in progress)
 
 You can install the development version from GitHub:

@@ -125,7 +125,7 @@ twowayfeweights_normalize_var2 = function(data, varname){
 twowayfeweights_normalize_var2(tb2, varname = D)
 twowayfeweights_normalize_var2(tb2, varname = c(CRT1,CRT2))
 
-## 3th function  twowayfeweights_transform ------------------------------------------------------------
+## 3rd function  twowayfeweights_transform ------------------------------------------------------------
 
 twowayfeweights_transform2 = function(data, controls, treatments, weights = NULL){
 
@@ -227,29 +227,56 @@ twowayfeweights_calculate_fetr2 <- function(data, controls = NULL){
   obs <- sum(data$weights)
   data <- data %>%
     group_by(G, T) %>%
-    mutate(P_gt = sum(weights, na.rm = T)) %>%
+    mutate(P_gt := sum(weights, na.rm = T)) %>%
     ungroup() %>%
-    mutate(P_gt = P_gt / obs,
-           nat_weight = P_gt * D / mean_D)
+    mutate(P_gt := P_gt / obs,
+           nat_weight := P_gt * D / mean_D)
 
   if (length(controls) == 0) {
     formula = "D ~ 1"
   }
   else {
 
-    if (length(controls) > 1) controls <- vapply(as.list(controls[-1]), rlang::as_string, FUN.VALUE = character(1))
-
-    formula = paste(controls, collapse = " + ")
+    if (length(controls) > 1) #controls <- vapply(as.list(controls[-1]), rlang::as_string, FUN.VALUE = character(1)
+      formula = paste(controls, collapse = " + ")
+    formula = sub('.{0,4}', '', formula) #replace line vapply code
     formula = paste("D ~ ", formula, sep = "")
   }
 
   formula = paste(formula, " | G + Tfactor", sep = "")
-  denom.lm <- feols(as.formula(formula), data = data, weights = abs(data$weights)
-                    )
+  denom.lm <- feols(as.formula(formula), data = data, weights = abs(data$weights))
   data$eps_1 <- residuals(denom.lm)
   data$eps_1_E_D_gt <- data$eps_1 * data$D
   denom_W <- weighted.mean(data$eps_1_E_D_gt, data$weights, na.rm = TRUE)
-  return(denom.lm)
+
+  data <- data %>%
+    mutate(W := eps_1 * mean_D / denom_W,
+           weight_result := W * nat_weight) %>%
+    select(-eps_1, -P_gt)
+
+  if (length(controls) == 0) {
+    formula = "Y ~ D"
+  }
+  else {
+    formula = paste(controls, collapse = " + ")
+    formula = sub('.{0,4}', '', formula)
+    formula = paste("Y ~ D + ", formula, sep = "")
+  }
+
+  formula = paste(formula, " | G + Tfactor", sep = "")
+  beta.lm <- feols(as.formula(formula), data = data, weights = data$weights)
+  beta <- coef(beta.lm)["D"]
+
+  # * Keeping only one observation in each group * period cell
+  # This should be done after this function
+  # bys `group' `time': gen group_period_unit=(_n==1)
+  # 	drop if group_period_unit==0
+  # 	drop group_period_unit
+  data <- data %>%
+    group_by(G, Tfactor) %>%
+    filter(row_number(D) == 1)
+
+  list(df = data, beta = beta)
 }
 
 

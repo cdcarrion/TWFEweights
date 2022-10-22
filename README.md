@@ -49,7 +49,7 @@ ggplot2::autoplot(bench)
 
 ### `twowayfeweights_transform()`
 
-With 100 iterations, `TWFEweights` is faster than `twowayfeweights` (see figure and code below). It should be noted the `twowayfeweights::twowayfeweights_transform()` doesn't any message corresponding to:
+With 100 iterations, `TWFEweights` is faster than `twowayfeweights` (see figure and code below). It should be noted the `twowayfeweights::twowayfeweights_transform()` doesn't show any message corresponding to:
 
 *The control variable state in the regression varies within some group * period cells. The results in de Chaisemartin, C. and D'Haultfoeuille, X. (2020) apply to two-way fixed effects regressions with controls apply to group * period level controls.*
 
@@ -57,15 +57,15 @@ With 100 iterations, `TWFEweights` is faster than `twowayfeweights` (see figure 
 ``` r
 bench = microbenchmark::microbenchmark(
   "twowayfeweights" = twowayfeweights_transform(data, controls = c("state", "crtl"), treatments = c("treat1", "treat2"), weights = "weight"),
-  "TWFEweights" =  twowayfeweights_transform(data, c(state, crtl), treatments = c(treat1, treat2), weights = weight), times = 100L
-)
+  "TWFEweights" =  twowayfeweights_transform(data, c(state, crtl), treatments = c(treat1, treat2), weights = weights), times = 100L)
 
-ggplot2::autoplot(bench)
 
 #Unit: milliseconds
 #expr                 min        lq      mean    median        uq      max neval cld
 #twowayfeweights 965.8343 1015.8995 1077.3514 1054.9228 1097.0104 1654.607   100   b
 #TWFEweights     169.7305  184.8745  205.5734  196.3479  217.6837  724.788   100   a 
+
+new_data = twowayfeweights_transform2(data, c(state, crtl), treatments = c(treat1, treat2), weights = weights)
 
 ggplot2::autoplot(bench)
 ```
@@ -76,11 +76,11 @@ ggplot2::autoplot(bench)
 
 With 100 iterations, `TWFEweights` is faster than `twowayfeweights` (see figure and code below).
 
-```
+```r
 bench = microbenchmark::microbenchmark(
   "twowayfeweights" = twowayfeweights_filter(data, cmd_type = "fdTR", controls = c("state", "crtl"), treatments = c("treat1", "treat2")),
-  "TWFEweights" =  twowayfeweights_filter(data, cmd_type = "fdTR", controls = c(state, crtl), treatments = c(treat1, treat2)), times = 100L
-)
+  "TWFEweights" =  twowayfeweights_filter(data, cmd_type = "fdTR", controls = c(state, crtl), treatments = c(treat1, treat2)), 
+  times = 100L)
 
 #Unit: milliseconds
 #expr                 min        lq       mean    median       uq      max neval cld
@@ -92,6 +92,27 @@ ggplot2::autoplot(bench)
 ```
 
 ![](pl3.png)
+
+### `twowayfeweights_calculate_fetr()`
+
+With 100 iterations, `TWFEweights` is faster than `twowayfeweights` (see figure and code below).
+
+```r
+bench = microbenchmark::microbenchmark(
+  "twowayfeweights" = twowayfeweights_calculate_fetr(new_data,c("crtl1","crtl2")),
+  "TWFEweights" =  twowayfeweights_calculate_fetr(new_data,c(crtl1,crtl2)),
+  times = 100L
+)
+
+#Unit: milliseconds
+#           expr      min       lq     mean   median       uq      max neval cld
+#twowayfeweights 355.1567 392.5500 424.8783 408.4257 423.0363 928.4801   100   b
+#    TWFEweights 139.6277 170.4667 178.6116 178.1720 189.2065 233.4703   100   a
+
+ggplot2::autoplot(bench)
+
+```
+![](pl4.png)
 
 ## Installation (in progress)
 

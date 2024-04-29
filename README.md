@@ -1,6 +1,6 @@
 # Two-Way Fixed Effects Weights
 
-**Note**: this package is in progress (5/15).
+**Note**: this package is in progress.
 
 ------------------------------------------------------------------------
 
